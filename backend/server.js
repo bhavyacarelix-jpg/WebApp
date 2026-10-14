@@ -16,7 +16,7 @@ const teachers = [
 ];
 
 app.get("/health", (_request, response) => {
-  response.json({ status: "okk" });
+  response.json({ status: "ok" });
 });
 
 app.get("/api/students", (_request, response) => {
