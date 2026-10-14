@@ -150,4 +150,4 @@ jobs:
             -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
             -o StrictHostKeyChecking=yes \
             "$EC2_USER@$EC2_HOST" \
-            "cd /WebApp && bash ./deploy.sh '$RELEASE_SHA'"
+            "cd WebApp && bash ./deploy.sh '$RELEASE_SHA'"
