@@ -1,38 +1,50 @@
 import { useState } from "react";
 
+const directoryTypes = {
+  students: { label: "Students", detailLabel: "Grade" },
+  teachers: { label: "Teachers", detailLabel: "Subject" },
+};
+
 export default function App() {
-  const [students, setStudents] = useState([]);
-  const [hasLoaded, setHasLoaded] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [directory, setDirectory] = useState(null);
+  const [selectedType, setSelectedType] = useState(null);
+  const [loadingType, setLoadingType] = useState(null);
   const [error, setError] = useState("");
 
-  async function getStudents() {
-    setIsLoading(true);
+  async function getDirectory(type) {
+    setSelectedType(type);
+    setLoadingType(type);
     setError("");
+    setDirectory(null);
 
     try {
-      const response = await fetch("/api/students");
+      const response = await fetch(`/api/${type}`);
       if (!response.ok) {
-        throw new Error(`Unable to load students (HTTP ${response.status}).`);
+        throw new Error(
+          `Unable to load ${directoryTypes[type].label.toLowerCase()} (HTTP ${response.status}).`,
+        );
       }
 
       const data = await response.json();
-      if (!Array.isArray(data.students)) {
-        throw new Error("The server returned an invalid student list.");
+      if (!Array.isArray(data[type])) {
+        throw new Error(`The server returned an invalid ${type} list.`);
       }
 
-      setStudents(data.students);
-      setHasLoaded(true);
+      setDirectory({ type, people: data[type] });
     } catch (requestError) {
       setError(
         requestError instanceof Error
           ? requestError.message
-          : "Unable to load students. Please try again.",
+          : `Unable to load ${directoryTypes[type].label.toLowerCase()}. Please try again.`,
       );
     } finally {
-      setIsLoading(false);
+      setLoadingType(null);
     }
   }
+
+  const directoryConfig = directory
+    ? directoryTypes[directory.type]
+    : null;
 
   return (
     <main className="page-shell">
@@ -46,72 +58,89 @@ export default function App() {
 
       <section className="content">
         <p className="eyebrow">DIRECTORY</p>
-        <h1>Students, at a glance.</h1>
+        <h1>Your campus directory.</h1>
         <p className="intro">
-          Browse the student directory and find the details you need.
+          Browse student and teacher details from across your campus.
         </p>
 
-        <button
-          className="students-button"
-          type="button"
-          onClick={getStudents}
-          disabled={isLoading}
-        >
-          {isLoading ? (
-            <>
-              <span className="spinner" aria-hidden="true" />
-              Loading students
-            </>
-          ) : (
-            <>
-              <span aria-hidden="true">⌕</span>
-              Students
-            </>
-          )}
-        </button>
+        <div className="directory-actions" aria-label="Choose a directory">
+          {Object.entries(directoryTypes).map(([type, config]) => (
+            <button
+              className="directory-button"
+              type="button"
+              key={type}
+              onClick={() => getDirectory(type)}
+              disabled={loadingType !== null}
+            >
+              {loadingType === type ? (
+                <>
+                  <span className="spinner" aria-hidden="true" />
+                  Loading {config.label.toLowerCase()}
+                </>
+              ) : (
+                <>
+                  <span aria-hidden="true">⌕</span>
+                  {config.label}
+                </>
+              )}
+            </button>
+          ))}
+        </div>
 
         {error && (
           <div className="message error-message" role="alert">
             <span>{error}</span>
-            <button className="retry-button" type="button" onClick={getStudents}>
+            <button
+              className="retry-button"
+              type="button"
+              onClick={() => getDirectory(selectedType ?? "students")}
+            >
               Try again
             </button>
           </div>
         )}
 
-        {hasLoaded && !error && (
+        {directory && directoryConfig && !error && (
           <section className="directory" aria-live="polite">
             <div className="directory-heading">
               <div>
-                <p className="eyebrow">STUDENT DIRECTORY</p>
-                <h2>All students</h2>
+                <p className="eyebrow">{directoryConfig.label.toUpperCase()} DIRECTORY</p>
+                <h2>All {directory.type}</h2>
               </div>
               <span className="count-badge">
-                {students.length} {students.length === 1 ? "student" : "students"}
+                {directory.people.length}{" "}
+                {directory.people.length === 1
+                  ? directory.type.slice(0, -1)
+                  : directory.type}
               </span>
             </div>
 
-            {students.length > 0 ? (
+            {directory.people.length > 0 ? (
               <div className="student-list">
-                {students.map((student) => (
-                  <article className="student-card" key={student.id}>
+                {directory.people.map((person) => (
+                  <article className="student-card" key={person.id}>
                     <div className="student-avatar" aria-hidden="true">
-                      {student.name
+                      {person.name
                         .split(" ")
                         .map((part) => part[0])
                         .join("")
                         .slice(0, 2)}
                     </div>
                     <div className="student-info">
-                      <h3>{student.name}</h3>
-                      <p>Student ID · {student.id}</p>
+                      <h3>{person.name}</h3>
+                      <p>{directoryConfig.label.slice(0, -1)} ID · {person.id}</p>
                     </div>
-                    <span className="grade-badge">Grade {student.grade}</span>
+                    <span className="grade-badge">
+                      {directoryConfig.detailLabel}{" "}
+                      {person[directory.type === "students" ? "grade" : "subject"]}
+                    </span>
                   </article>
                 ))}
               </div>
             ) : (
-              <p className="message empty-message">No students to display yet.</p>
+              <p className="message empty-message">
+                No {directory.type} to display yet.
+              </p>
             )}
           </section>
         )}

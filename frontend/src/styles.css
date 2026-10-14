@@ -109,7 +109,13 @@ h1 {
   line-height: 1.6;
 }
 
-.students-button {
+.directory-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.directory-button {
   display: inline-flex;
   min-height: 48px;
   align-items: center;
@@ -126,23 +132,23 @@ h1 {
   transition: background 150ms ease, transform 150ms ease;
 }
 
-.students-button:hover:not(:disabled) {
+.directory-button:hover:not(:disabled) {
   transform: translateY(-1px);
   background: #5149c3;
 }
 
-.students-button:focus-visible,
+.directory-button:focus-visible,
 .retry-button:focus-visible {
   outline: 3px solid #aaa5ff;
   outline-offset: 3px;
 }
 
-.students-button:disabled {
+.directory-button:disabled {
   cursor: wait;
   opacity: 0.8;
 }
 
-.students-button > span[aria-hidden="true"]:not(.spinner) {
+.directory-button > span[aria-hidden="true"]:not(.spinner) {
   font-size: 22px;
   line-height: 1;
 }

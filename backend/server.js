@@ -9,12 +9,22 @@ const students = [
   { id: 3, name: "Rohan Mehta", grade: "12" },
 ];
 
+const teachers = [
+  { id: 1, name: "Ananya Rao", subject: "Mathematics" },
+  { id: 2, name: "Kabir Joshi", subject: "Science" },
+  { id: 3, name: "Neha Desai", subject: "English" },
+];
+
 app.get("/health", (_request, response) => {
   response.json({ status: "ok" });
 });
 
 app.get("/api/students", (_request, response) => {
   response.json({ students });
+});
+
+app.get("/api/teachers", (_request, response) => {
+  response.json({ teachers });
 });
 
 app.listen(port, () => {
