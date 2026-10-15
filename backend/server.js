@@ -20,7 +20,6 @@ const healthCheck = (_request, response) => {
 };
 
 app.get("/health", healthCheck);
-
 app.get("/api/health", healthCheck);
 app.get("/api/students", (_request, response) => {
   response.json({ students });
