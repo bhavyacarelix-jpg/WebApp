@@ -24,7 +24,6 @@ app.get("/api/health", healthCheck);
 app.get("/api/students", (_request, response) => {
   response.json({ students });
 });
-
 app.get("/api/teachers", (_request, response) => {
   response.json({ teachers });
 });
