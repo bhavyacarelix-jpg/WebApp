@@ -16,7 +16,7 @@ const teachers = [
 ];
 
 const healthCheck = (_request, response) => {
-  response.json({ status: "okk" });
+  response.json({ status: "ok" });
 };
 
 app.get("/health", healthCheck);
