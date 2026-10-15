@@ -1,8 +1,24 @@
 import { useState } from "react";
 
 const directoryTypes = {
-  students: { label: "Students", detailLabel: "Grade" },
-  teachers: { label: "Teachers", detailLabel: "Subject" },
+  students: {
+    label: "Students",
+    singularLabel: "Student",
+    detailLabel: "Grade",
+    detailKey: "grade",
+  },
+  teachers: {
+    label: "Teachers",
+    singularLabel: "Teacher",
+    detailLabel: "Subject",
+    detailKey: "subject",
+  },
+  staff: {
+    label: "Staff",
+    singularLabel: "Staff member",
+    detailLabel: "Role",
+    detailKey: "role",
+  },
 };
 
 export default function App() {
@@ -60,7 +76,7 @@ export default function App() {
         <p className="eyebrow">DIRECTORY</p>
         <h1>Your campus directory.</h1>
         <p className="intro">
-          Browse student and teacher details from across your campus.
+          Browse student, teacher, and staff details from across your campus.
         </p>
 
         <div className="directory-actions" aria-label="Choose a directory">
@@ -110,8 +126,8 @@ export default function App() {
               <span className="count-badge">
                 {directory.people.length}{" "}
                 {directory.people.length === 1
-                  ? directory.type.slice(0, -1)
-                  : directory.type}
+                  ? directoryConfig.singularLabel.toLowerCase()
+                  : directoryConfig.label.toLowerCase()}
               </span>
             </div>
 
@@ -128,11 +144,12 @@ export default function App() {
                     </div>
                     <div className="student-info">
                       <h3>{person.name}</h3>
-                      <p>{directoryConfig.label.slice(0, -1)} ID · {person.id}</p>
+                      <p>{directoryConfig.singularLabel} ID · {person.id}</p>
+                      {person.department && <p>Department · {person.department}</p>}
                     </div>
                     <span className="grade-badge">
                       {directoryConfig.detailLabel}{" "}
-                      {person[directory.type === "students" ? "grade" : "subject"]}
+                      {person[directoryConfig.detailKey]}
                     </span>
                   </article>
                 ))}

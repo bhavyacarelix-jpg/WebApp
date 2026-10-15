@@ -15,6 +15,12 @@ const teachers = [
   { id: 3, name: "Neha Desai", subject: "English" },
 ];
 
+const staff = [
+  { id: 1, name: "Sana Kapoor", role: "Librarian", department: "Library" },
+  { id: 2, name: "Dev Malhotra", role: "Nurse", department: "Health Services" },
+  { id: 3, name: "Ira Nair", role: "Counselor", department: "Student Support" },
+];
+
 const healthCheck = (_request, response) => {
   response.json({ status: "okk" });
 };
@@ -27,6 +33,9 @@ app.get("/api/students", (_request, response) => {
 });
 app.get("/api/teachers", (_request, response) => {
   response.json({ teachers });
+});
+app.get("/api/staff", (_request, response) => {
+  response.json({ staff });
 });
 
 app.listen(port, () => {
