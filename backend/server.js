@@ -15,10 +15,12 @@ const teachers = [
   { id: 3, name: "Neha Desai", subject: "English" },
 ];
 
-app.get("/health", (_request, response) => {
-  response.json({ status: "okk" });
-});
+const healthCheck = (_request, response) => {
+  response.json({ status: "ok" });
+};
 
+app.get("/health", healthCheck);
+app.get("/api/health", healthCheck);
 app.get("/api/students", (_request, response) => {
   response.json({ students });
 });
