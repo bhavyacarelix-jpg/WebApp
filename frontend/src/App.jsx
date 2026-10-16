@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const directoryTypes = {
   students: {
@@ -26,6 +26,16 @@ export default function App() {
   const [selectedType, setSelectedType] = useState(null);
   const [loadingType, setLoadingType] = useState(null);
   const [error, setError] = useState("");
+  const [isAddStudentOpen, setIsAddStudentOpen] = useState(false);
+  const [isSavingStudent, setIsSavingStudent] = useState(false);
+  const [formError, setFormError] = useState("");
+  const dialogRef = useRef(null);
+
+  useEffect(() => {
+    if (isAddStudentOpen) {
+      dialogRef.current?.showModal();
+    }
+  }, [isAddStudentOpen]);
 
   async function getDirectory(type) {
     setSelectedType(type);
@@ -58,6 +68,43 @@ export default function App() {
     }
   }
 
+  async function addStudent(event) {
+    event.preventDefault();
+    setIsSavingStudent(true);
+    setFormError("");
+
+    const formData = new FormData(event.currentTarget);
+    const student = {
+      name: formData.get("name"),
+      grade: formData.get("grade"),
+      department: formData.get("department"),
+    };
+
+    try {
+      const response = await fetch("/api/students", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(student),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || `Unable to add student (HTTP ${response.status}).`);
+      }
+
+      dialogRef.current?.close();
+      setIsAddStudentOpen(false);
+      await getDirectory("students");
+    } catch (requestError) {
+      setFormError(
+        requestError instanceof Error
+          ? requestError.message
+          : "Unable to add student. Please try again.",
+      );
+    } finally {
+      setIsSavingStudent(false);
+    }
+  }
+
   const directoryConfig = directory
     ? directoryTypes[directory.type]
     : null;
@@ -80,6 +127,17 @@ export default function App() {
         </p>
 
         <div className="directory-actions" aria-label="Choose a directory">
+          <button
+            className="directory-button"
+            type="button"
+            onClick={() => {
+              setFormError("");
+              setIsAddStudentOpen(true);
+            }}
+          >
+            <span aria-hidden="true">+</span>
+            Add student
+          </button>
           {Object.entries(directoryTypes).map(([type, config]) => (
             <button
               className="directory-button"
@@ -114,6 +172,52 @@ export default function App() {
               Try again
             </button>
           </div>
+        )}
+
+        {isAddStudentOpen && (
+          <dialog
+            className="student-dialog"
+            ref={dialogRef}
+            aria-labelledby="student-dialog-title"
+            onClose={() => setIsAddStudentOpen(false)}
+          >
+            <form className="student-form" onSubmit={addStudent}>
+              <p className="eyebrow">STUDENT DETAILS</p>
+              <h2 id="student-dialog-title">Add a student</h2>
+              <label>
+                Name
+                <input name="name" type="text" autoComplete="name" required />
+              </label>
+              <label>
+                Grade
+                <input name="grade" type="text" required />
+              </label>
+              <label>
+                Department <span className="optional-label">(optional)</span>
+                <input name="department" type="text" />
+              </label>
+              {formError && (
+                <p className="form-error" role="alert">{formError}</p>
+              )}
+              <div className="form-actions">
+                <button
+                  className="cancel-button"
+                  type="button"
+                  onClick={() => dialogRef.current?.close()}
+                  disabled={isSavingStudent}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="directory-button"
+                  type="submit"
+                  disabled={isSavingStudent}
+                >
+                  {isSavingStudent ? "Saving..." : "Save student"}
+                </button>
+              </div>
+            </form>
+          </dialog>
         )}
 
         {directory && directoryConfig && !error && (

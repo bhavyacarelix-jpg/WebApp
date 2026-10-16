@@ -1,13 +1,22 @@
 import express from "express";
+import mongoose from "mongoose";
+import dotenv from "dotenv";
+
+dotenv.config({ path: "../.env" });
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-const students = [
-  { id: 1, name: "Aarav Shah", grade: "10" },
-  { id: 2, name: "Maya Patel", grade: "11" },
-  { id: 3, name: "Rohan Mehta", grade: "12" },
-];
+const studentSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true, trim: true },
+    grade: { type: String, required: true, trim: true },
+    department: { type: String, trim: true, default: "" },
+  },
+  { timestamps: true },
+);
+
+const Student = mongoose.model("Student", studentSchema);
 
 const teachers = [
   { id: 1, name: "Ananya Rao", subject: "Mathematics" },
@@ -25,12 +34,61 @@ const healthCheck = (_request, response) => {
   response.json({ status: "okk" });
 };
 
+app.use(express.json());
+
 app.get("/health", healthCheck);
 
 app.get("/api/health", healthCheck);
-app.get("/api/students", (_request, response) => {
-  response.json({ students });
+app.get("/api/students", async (_request, response, next) => {
+  try {
+    const students = await Student.find().sort({ createdAt: -1 }).lean();
+    response.json({
+      students: students.map(({ _id, name, grade, department }) => ({
+        id: _id.toString(),
+        name,
+        grade,
+        ...(department ? { department } : {}),
+      })),
+    });
+  } catch (error) {
+    next(error);
+  }
 });
+
+app.post("/api/students", async (request, response, next) => {
+  const { name, grade, department } = request.body ?? {};
+  if (
+    typeof name !== "string" ||
+    !name.trim() ||
+    typeof grade !== "string" ||
+    !grade.trim() ||
+    (department !== undefined && typeof department !== "string")
+  ) {
+    response.status(400).json({
+      error: "Name and grade are required; department must be a string.",
+    });
+    return;
+  }
+
+  try {
+    const student = await Student.create({
+      name: name.trim(),
+      grade: grade.trim(),
+      department: department?.trim() ?? "",
+    });
+    response.status(201).json({
+      student: {
+        id: student._id.toString(),
+        name: student.name,
+        grade: student.grade,
+        ...(student.department ? { department: student.department } : {}),
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 app.get("/api/teachers", (_request, response) => {
   response.json({ teachers });
 });
@@ -38,6 +96,23 @@ app.get("/api/staff", (_request, response) => {
   response.json({ staff });
 });
 
-app.listen(port, () => {
-  console.log(`Backend server listening on port ${port}`);
+app.use((error, _request, response, _next) => {
+  console.error("API request failed:", error);
+  response.status(500).json({ error: "An unexpected server error occurred." });
+});
+
+async function startServer() {
+  const mongoUri =
+    process.env.MONGODB_URI;
+
+  await mongoose.connect(mongoUri);
+  console.log("Connected to MongoDB");
+  app.listen(port, () => {
+    console.log(`Backend server listening on port ${port}`);
+  });
+}
+
+startServer().catch((error) => {
+  console.error("Unable to start backend:", error);
+  process.exitCode = 1;
 });

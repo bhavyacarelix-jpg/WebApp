@@ -300,6 +300,94 @@ h2 {
   background: #fce9e9;
 }
 
+.student-dialog {
+  width: min(100% - 32px, 440px);
+  max-width: 440px;
+  padding: 0;
+  overflow: visible;
+  border: 0;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 24px 80px rgb(25 31 51 / 24%);
+}
+
+.student-dialog::backdrop {
+  background: rgb(28 34 52 / 48%);
+  backdrop-filter: blur(3px);
+}
+
+.student-form {
+  display: grid;
+  gap: 18px;
+  padding: 30px;
+}
+
+.student-form .eyebrow {
+  margin-bottom: -12px;
+  color: #635bdb;
+}
+
+.student-form h2 {
+  margin-bottom: 2px;
+}
+
+.student-form label {
+  display: grid;
+  gap: 7px;
+  color: #394357;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.student-form input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid #dfe2eb;
+  border-radius: 9px;
+  color: #202b3c;
+  font: inherit;
+  font-weight: 400;
+}
+
+.student-form input:focus-visible {
+  border-color: #635bdb;
+  outline: 3px solid #eeedff;
+}
+
+.optional-label {
+  color: #9299a8;
+  font-weight: 400;
+}
+
+.form-error {
+  margin: 0;
+  color: #a13e3e;
+  font-size: 13px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.cancel-button {
+  min-height: 48px;
+  padding: 0 16px;
+  border: 1px solid #e1e4ed;
+  border-radius: 12px;
+  background: #fff;
+  color: #606b7d;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.cancel-button:hover:not(:disabled) {
+  background: #f6f7fb;
+}
+
 .footer {
   padding: 20px 24px;
   border-top: 1px solid #e8eaf0;
@@ -324,6 +412,10 @@ h2 {
   .student-card {
     gap: 11px;
     padding: 14px 12px;
+  }
+
+  .student-form {
+    padding: 24px;
   }
 
   .grade-badge {
