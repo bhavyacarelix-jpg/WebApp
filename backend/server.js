@@ -106,7 +106,7 @@ async function startServer() {
     process.env.MONGODB_URI;
 
   await mongoose.connect(mongoUri);
-  console.log("Connected to MongoDB");
+  console.log("Connected to MongoDB.");
   app.listen(port, () => {
     console.log(`Backend server listening on port ${port}`);
   });
